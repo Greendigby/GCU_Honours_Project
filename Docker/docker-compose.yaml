@@ -1,0 +1,48 @@
+services:
+  text-generation-webui:
+    image: atinoda/text-generation-webui:default-nvidia  # NVIDIA-accelerated version of the Text Generation Web UI
+    container_name: text-generation-webui
+
+    ports:
+      - "7860:7860"  # Expose web UI on http://localhost:7860
+      - "5000:5000"  # Expose Rest API for use with testing scripts on http://localhost:5000
+
+    environment:
+      - EXTRA_LAUNCH_ARGS=--listen --verbose  # Server listens on all interfaces with verbose logging
+
+    init: true  # Helps handle zombie processes and signals properly
+
+    volumes:
+      # Cache directory (can store downloaded models or files from HuggingFace, etc.)
+      - ./config/cache:/root/.cache
+
+      # WebUI configuration and user data
+      - ./config/characters:/app/user_data/characters
+      - ./config/grammars:/app/user_data/grammars
+      - ./config/instruction-templates:/app/user_data/instruction-templates
+      - ./config/loras:/app/user_data/loras
+      - ./config/logs:/app/user_data/logs            # Persist chat logs
+      - ./config/models:/app/user_data/models        # Store model files here
+      - ./config/presets:/app/user_data/presets
+      - ./config/prompts:/app/user_data/prompts
+      - ./config/training:/app/user_data/training
+
+      # Optional: Uncomment to persist all or specific extensions
+      # - ./config/extensions:/app/extensions
+      # - ./config/extensions/coqui_tts:/app/extensions/coqui_tts
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"   # Rotate logs after reaching 10MB
+        max-file: "3"     # Keep last 3 log files
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']         # Use GPU 0 (modify if using multiple GPUs)
+              capabilities: [gpu]
+
+
