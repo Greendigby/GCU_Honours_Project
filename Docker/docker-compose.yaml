@@ -10,7 +10,7 @@ services:
     environment:
       - EXTRA_LAUNCH_ARGS=--listen --verbose  # Server listens on all interfaces with verbose logging
 
-    init: true  # Helps handle zombie processes and signals properly
+    init: true  # Helps handle signals properly
 
     volumes:
       # Cache directory (can store downloaded models or files from HuggingFace, etc.)
@@ -27,9 +27,7 @@ services:
       - ./config/prompts:/app/user_data/prompts
       - ./config/training:/app/user_data/training
 
-      # Optional: Uncomment to persist all or specific extensions
-      # - ./config/extensions:/app/extensions
-      # - ./config/extensions/coqui_tts:/app/extensions/coqui_tts
+
 
     logging:
       driver: json-file
@@ -42,7 +40,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0']         # Use GPU 0 (modify if using multiple GPUs)
+              device_ids: ['0']         
               capabilities: [gpu]
 
 
